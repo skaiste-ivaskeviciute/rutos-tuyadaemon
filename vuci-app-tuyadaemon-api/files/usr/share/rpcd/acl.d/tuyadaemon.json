@@ -1,0 +1,15 @@
+{
+  "services/tuyadaemon": {
+    "description": "Tuyadaemon App permissions",
+    "read": {
+      "api": [
+        "/tuyadaemon/*"
+      ]
+    },
+    "write": {
+      "api": [
+        "/tuyadaemon/*"
+      ]
+    }
+  }
+}
