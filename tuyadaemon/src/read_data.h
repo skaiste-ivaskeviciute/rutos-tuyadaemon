@@ -21,36 +21,6 @@ struct RawInterfaceData {
 	int tx;
 };
 
-enum {
-	TOTAL_MEMORY,
-	FREE_MEMORY,
-	__MEMORY_MAX,
-};
-
-enum {
-	MEMORY_DATA,
-	CPU_LOAD_DATA,
-	UPTIME_DATA,
-	__INFO_MAX,
-};
-
-enum {
-	NETWORK_DATA,
-	__NETWORK_MAX,
-};
-
-enum {
-	INTERFACE_DATA,
-	__INTERFACE_DATA_MAX,
-};
-
-enum {
-	RX_DATA,
-	TX_DATA,
-	__NETDATA_MAX,
-};
-
-
 struct Parameters;
 struct Netinterface;
 struct blob_attr;
