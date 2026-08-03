@@ -30,7 +30,7 @@ define Package/tuyadaemon/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tuyadaemon $(1)/usr/bin/
 	$(INSTALL_BIN) ./files/tuyadaemon.init $(1)/etc/init.d/tuyadaemon
-	$(INSTALL_CONF) ./files/tuyadaemonconf.config $(1)/etc/config/tuyadaemonconf
+	$(INSTALL_CONF) ./files/tuyadaemon.config $(1)/etc/config/tuyadaemon
 endef
  
 $(eval $(call BuildPackage,tuyadaemon))

@@ -1,3 +1,0 @@
-[
-    { "/tuyadaemon/{service_group}/{?sid}": "services/tuyadaemonconfig" }
-]

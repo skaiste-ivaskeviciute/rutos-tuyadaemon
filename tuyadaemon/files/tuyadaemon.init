@@ -10,7 +10,7 @@ service_data() {
                 
 start_service() {   
 	local enabled                    
-	config_load "tuyadaemon"
+	config_load "tuya"
 	config_get productid config 'productid' ' '
 	config_get deviceid config 'deviceid' ' '
 	config_get devicesecret config 'devicesecret' ' '
@@ -20,13 +20,13 @@ start_service() {
 		procd_open_instance          
 		procd_set_param command /usr/local/usr/bin/tuyadaemon -p "$productid" -d "$deviceid" -s "$devicesecret"
 		procd_set_param pidfile /var/run/tuyadaemon.pid                                                        
-		procd_set_param file /etc/config/tuyadaemon    
+		procd_set_param file /etc/config/tuya  
 		procd_close_instance                                                                                   
 	fi                                                     
 }                                                          
                                     
 service_triggers() {
-	procd_add_reload_trigger "tuyadaemon"
+	procd_add_reload_trigger "tuya"
 }                                            
                     
 reload_service() {                           

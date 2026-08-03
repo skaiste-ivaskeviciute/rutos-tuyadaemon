@@ -9,8 +9,8 @@ local Service = ConfigService:new({
 })
 
 local ConfigSection = Service:section(
-	"tuyadaemon", -- UCI config name
-	"tuyadaemon"  -- UCI section type
+	"tuya", -- UCI config name
+	"tuya"  -- UCI section type
 )
 ConfigSection:make_primary()
 ConfigSection.default_options.id.maxlength = 8 -- Default id option can also have validations

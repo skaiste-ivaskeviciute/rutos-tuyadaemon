@@ -1,14 +1,14 @@
 {
-  "services/tuyadaemon": {
+  "services/tuya": {
     "description": "Tuyadaemon App permissions",
     "read": {
       "api": [
-        "/tuyadaemon/*"
+        "/tuya/*"
       ]
     },
     "write": {
       "api": [
-        "/tuyadaemon/*"
+        "/tuya/*"
       ]
     }
   }
