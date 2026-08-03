@@ -1,7 +1,7 @@
 #ifndef READDATA_H
 #define READDATA_H
 
-#include "net_interface.h"
+#include "interfaces_list.h"
 
 #include <stdio.h>
 #include <stdint.h>

@@ -1,6 +1,6 @@
 #include "read_data.h"
 #include "message_handler.h"
-#include "net_interface.h"
+#include "interfaces_list.h"
 
 #include <libubox/blobmsg_json.h>
 #include <libubus.h>
@@ -10,34 +10,6 @@
 #include <string.h>
 #include <syslog.h>
 #include <uci.h>
-
-static void systeminfo_cb(struct ubus_request *req, int type, struct blob_attr *msg);
-static void netintstatus_cb(struct ubus_request *req, int type, struct blob_attr *msg);
-static void netintdump_cb(struct ubus_request *req, int type, struct blob_attr *msg);
-
-static const struct blobmsg_policy memory_policy[__MEMORY_MAX] = {
-	[TOTAL_MEMORY]	  = { .name = "total", .type = BLOBMSG_TYPE_INT64 },
-	[FREE_MEMORY]	  = { .name = "free", .type = BLOBMSG_TYPE_INT64 },
-};
-
-static const struct blobmsg_policy info_policy[__INFO_MAX] = {
-	[MEMORY_DATA]	= { .name = "memory", .type = BLOBMSG_TYPE_TABLE },
-	[CPU_LOAD_DATA]	= { .name = "load", .type = BLOBMSG_TYPE_ARRAY },
-	[UPTIME_DATA]	= { .name = "uptime", .type = BLOBMSG_TYPE_INT32 },
-};
-
-static const struct blobmsg_policy network_statistics_policy[__NETWORK_MAX] = {
-	[NETWORK_DATA]	= { .name = "statistics", .type = BLOBMSG_TYPE_TABLE },
-};
-
-static const struct blobmsg_policy network_data_policy[__NETDATA_MAX] = {
-	[RX_DATA]	= { .name = "rx_bytes", .type = BLOBMSG_TYPE_INT64 },
-	[TX_DATA]	= { .name = "tx_bytes", .type = BLOBMSG_TYPE_INT64 },
-};
-
-static const struct blobmsg_policy network_interface_policy[__INTERFACE_DATA_MAX] = {
-	[INTERFACE_DATA]	= { .name = "interface", .type = BLOBMSG_TYPE_ARRAY },
-};
 
 enum {
 	TOTAL_MEMORY,
@@ -67,6 +39,34 @@ enum {
 	TX_DATA,
 	__NETDATA_MAX,
 };
+
+static const struct blobmsg_policy memory_policy[__MEMORY_MAX] = {
+	[TOTAL_MEMORY]	  = { .name = "total", .type = BLOBMSG_TYPE_INT64 },
+	[FREE_MEMORY]	  = { .name = "free", .type = BLOBMSG_TYPE_INT64 },
+};
+
+static const struct blobmsg_policy info_policy[__INFO_MAX] = {
+	[MEMORY_DATA]	= { .name = "memory", .type = BLOBMSG_TYPE_TABLE },
+	[CPU_LOAD_DATA]	= { .name = "load", .type = BLOBMSG_TYPE_ARRAY },
+	[UPTIME_DATA]	= { .name = "uptime", .type = BLOBMSG_TYPE_INT32 },
+};
+
+static const struct blobmsg_policy network_statistics_policy[__NETWORK_MAX] = {
+	[NETWORK_DATA]	= { .name = "statistics", .type = BLOBMSG_TYPE_TABLE },
+};
+
+static const struct blobmsg_policy network_data_policy[__NETDATA_MAX] = {
+	[RX_DATA]	= { .name = "rx_bytes", .type = BLOBMSG_TYPE_INT64 },
+	[TX_DATA]	= { .name = "tx_bytes", .type = BLOBMSG_TYPE_INT64 },
+};
+
+static const struct blobmsg_policy network_interface_policy[__INTERFACE_DATA_MAX] = {
+	[INTERFACE_DATA]	= { .name = "interface", .type = BLOBMSG_TYPE_ARRAY },
+};
+
+static void systeminfo_cb(struct ubus_request *req, int type, struct blob_attr *msg);
+static void netintstatus_cb(struct ubus_request *req, int type, struct blob_attr *msg);
+static void netintdump_cb(struct ubus_request *req, int type, struct blob_attr *msg);
 
 // Gets total RAM, free RAM, CPU load, uptime and network interface parameters from UBUS
 int read_ubus_data(struct Parameters *parameters) {

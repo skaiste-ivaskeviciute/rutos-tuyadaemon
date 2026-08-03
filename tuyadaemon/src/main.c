@@ -1,6 +1,6 @@
 #define _XOPEN_SOURCE 700
 
-#include "net_interface.h"
+#include "interfaces_list.h"
 #include "message_handler.h"
 #include "argument_parsing.h"
 #include "cloud_connection.h"
