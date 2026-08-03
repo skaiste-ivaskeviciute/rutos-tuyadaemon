@@ -11,6 +11,10 @@
 #include <syslog.h>
 #include <uci.h>
 
+static void systeminfo_cb(struct ubus_request *req, int type, struct blob_attr *msg);
+static void netintstatus_cb(struct ubus_request *req, int type, struct blob_attr *msg);
+static void netintdump_cb(struct ubus_request *req, int type, struct blob_attr *msg);
+
 static const struct blobmsg_policy memory_policy[__MEMORY_MAX] = {
 	[TOTAL_MEMORY]	  = { .name = "total", .type = BLOBMSG_TYPE_INT64 },
 	[FREE_MEMORY]	  = { .name = "free", .type = BLOBMSG_TYPE_INT64 },
@@ -34,6 +38,64 @@ static const struct blobmsg_policy network_data_policy[__NETDATA_MAX] = {
 static const struct blobmsg_policy network_interface_policy[__INTERFACE_DATA_MAX] = {
 	[INTERFACE_DATA]	= { .name = "interface", .type = BLOBMSG_TYPE_ARRAY },
 };
+
+enum {
+	TOTAL_MEMORY,
+	FREE_MEMORY,
+	__MEMORY_MAX,
+};
+
+enum {
+	MEMORY_DATA,
+	CPU_LOAD_DATA,
+	UPTIME_DATA,
+	__INFO_MAX,
+};
+
+enum {
+	NETWORK_DATA,
+	__NETWORK_MAX,
+};
+
+enum {
+	INTERFACE_DATA,
+	__INTERFACE_DATA_MAX,
+};
+
+enum {
+	RX_DATA,
+	TX_DATA,
+	__NETDATA_MAX,
+};
+
+// Gets total RAM, free RAM, CPU load, uptime and network interface parameters from UBUS
+int read_ubus_data(struct Parameters *parameters) {
+    struct ubus_context *ctx;
+	uint32_t id;
+	int status = SUCCESS;
+
+	struct RawSystemInfoData systeminfodata = { 0 };
+	struct RawInterfaceData interfacedata = { 0 };
+
+	ctx = ubus_connect(NULL);
+	if (!ctx) {
+		syslog(LOG_ERR,  "Failed to connect to ubus\n");
+		return FAILURE;
+	}
+
+	if (read_system_info_data(parameters, &systeminfodata, ctx, &id) != SUCCESS) {
+		syslog(LOG_ERR, "Failed to read CPU, RAM and uptime data");
+		status = FAILURE;
+	}
+	if (read_network_interfaces_by_name(&(parameters->interfacelist), &interfacedata, ctx, &id) != SUCCESS) {
+		syslog(LOG_ERR, "Failed to read network interface data");
+		status = FAILURE;
+	}
+
+	ubus_free(ctx);
+
+	return status;
+}
 
 // Callback function for reading CPU, RAM and uptime data from system info
 static void systeminfo_cb(struct ubus_request *req, int type, struct blob_attr *msg)
@@ -70,49 +132,6 @@ static void systeminfo_cb(struct ubus_request *req, int type, struct blob_attr *
 	receivedData->free = blobmsg_get_u64(memory[FREE_MEMORY]);
 }
 
-// Converts CPU load data into integer format
-void parse_cpu_load_data(struct blob_attr *tb[], struct RawSystemInfoData *receivedData)
-{
-	int i = 0;
-	struct blob_attr *cur;
-	size_t rem;
-	blobmsg_for_each_attr(cur, tb[CPU_LOAD_DATA], rem) {
-		if (blobmsg_type(cur) != BLOBMSG_TYPE_INT32) {
-			continue;
-		}
-		receivedData->load[i++] = blobmsg_get_u32(cur);
-	}
-}
-
-// Gets total RAM, free RAM, CPU load, uptime and network interface parameters from UBUS
-int read_ubus_data(struct Parameters *parameters) {
-    struct ubus_context *ctx;
-	uint32_t id;
-	int status = SUCCESS;
-
-	struct RawSystemInfoData systeminfodata = { 0 };
-	struct RawInterfaceData interfacedata = { 0 };
-
-	ctx = ubus_connect(NULL);
-	if (!ctx) {
-		syslog(LOG_ERR,  "Failed to connect to ubus\n");
-		return FAILURE;
-	}
-
-	if (read_system_info_data(parameters, &systeminfodata, ctx, &id) != SUCCESS) {
-		syslog(LOG_ERR, "Failed to read CPU, RAM and uptime data");
-		status = FAILURE;
-	}
-	if (read_network_interfaces_by_name(&(parameters->interfacelist), &interfacedata, ctx, &id) != SUCCESS) {
-		syslog(LOG_ERR, "Failed to read network interface data");
-		status = FAILURE;
-	}
-
-	ubus_free(ctx);
-
-	return status;
-}
-
 // Calls system info
 int read_system_info_data(struct Parameters *parameters, struct RawSystemInfoData *systeminfodata, struct ubus_context *ctx, uint32_t *id)
 {
@@ -140,6 +159,20 @@ int read_system_info_data(struct Parameters *parameters, struct RawSystemInfoDat
 	}
 
 	return SUCCESS;
+}
+
+// Converts CPU load data into integer format
+void parse_cpu_load_data(struct blob_attr *tb[], struct RawSystemInfoData *receivedData)
+{
+	int i = 0;
+	struct blob_attr *cur;
+	size_t rem;
+	blobmsg_for_each_attr(cur, tb[CPU_LOAD_DATA], rem) {
+		if (blobmsg_type(cur) != BLOBMSG_TYPE_INT32) {
+			continue;
+		}
+		receivedData->load[i++] = blobmsg_get_u32(cur);
+	}
 }
 
 // For each network interface name gotten from UCI, reads interface data from UBUS
