@@ -1,4 +1,4 @@
-config tuyadaemon 'config'
+config tuya 'config'
     option productid ' '
     option deviceid ' '
     option devicesecret ' '
